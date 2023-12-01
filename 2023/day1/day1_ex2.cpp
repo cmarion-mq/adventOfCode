@@ -25,7 +25,8 @@ int main () {
                         for (auto d : digits) {
                             if (input.find(d.first, i) == i) {
                                 nbr.push_back(d.second);
-                                // i += d.first.length() - 1;
+                                // i += d.first.length() - 1; ne fonctionne pas, du fait de lettres communes a certains chiffres
+                                // i += d.first.length() - 2; //fonctionne et limite le passage dans le for, les chiffres n'ont pas plus d'une lettre commune entre début et fin
                                 break;
                             }
                         }
