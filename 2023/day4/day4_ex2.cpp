@@ -15,7 +15,6 @@ int main () {
     map<int, int> wcards;
     int c = 1;
     int w;
-    int nb;
 
     if (myfile.is_open()) {
         while(getline (myfile, input)) {
