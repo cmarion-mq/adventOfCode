@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <algorithm>
 
 using namespace std;
@@ -25,9 +26,36 @@ int main () {
                 while(i < input.length()) {
                     b = stol(input.substr(i), &sz);
                     i += sz + 1;
-                    e = stol(input.substr(i), &sz);
+                    e = b + stol(input.substr(i), &sz);
                     i += sz + 1;
-                    seeds.push_back({b, e});
+                    if (seeds.size() == 0)
+                        seeds.push_back({b, e});
+                    else {
+                        int k = 0;
+                        for (auto s : seeds){
+                            cerr << b << " " << e << " " << seeds.size() << " " << s[0] << " " << s[1] << endl;
+                            if (b >= s[0] && e <= s[1]) {
+                                continue;
+                            }
+                            else if (b >= s[0] && e > s[1]) {
+                                s[1] = e;
+                                break;
+                            }
+                            else if (b < s[0] && e > s[0]) {
+                                s[0] = b;
+                                break;
+                            }
+                            else if (b < s[0] && e > s[1]) {
+                                s[0] = b;
+                                s[1] = e;
+                                break;
+                            } else {
+                                k ++;
+                            }
+                        }
+                        if (k == seeds.size())
+                            seeds.push_back({b, e});
+                    }
                 }
             }
             else if (input.length() > 0 && isdigit(input[0])) {
@@ -44,9 +72,12 @@ int main () {
             l ++;
         }
     }
-    min = seeds[0][0];
+    // for (auto s : seeds) {
+    //     cerr << s[0] << ' ' << s[1] << endl; 
+    // }
+    min = 9223372036854775807;
     for (auto s : seeds) {
-        // cerr << "@@ SEED @@ " << i << endl;
+        cerr << "@@ SEED @@ " << i << endl;
         for (long sr = s[0]; sr < s[0] + s[1]; sr++) {
             long sri = sr;
             for (auto c : cats) {
