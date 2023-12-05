@@ -9,7 +9,7 @@
 using namespace std;
 
 int main () {
-    ifstream myfile("day5_input.txt");
+    ifstream myfile("day5_testInput.txt");
     string input;
     vector<vector<long>> seeds;
     string::size_type sz;
@@ -33,15 +33,13 @@ int main () {
                     else {
                         int k = 0;
                         for (auto s : seeds){
-                            cerr << b << " " << e << " " << seeds.size() << " " << s[0] << " " << s[1] << endl;
-                            if (b >= s[0] && e <= s[1]) {
+                            if (b >= s[0] && e <= s[1]) 
                                 continue;
-                            }
-                            else if (b >= s[0] && e > s[1]) {
+                            else if (b >= s[0] && e > s[1] && e <= s[1]) {
                                 s[1] = e;
                                 break;
                             }
-                            else if (b < s[0] && e > s[0]) {
+                            else if (b < s[0] && e <= s[1] && e >= s[0]) {
                                 s[0] = b;
                                 break;
                             }
@@ -72,32 +70,47 @@ int main () {
             l ++;
         }
     }
-    // for (auto s : seeds) {
-    //     cerr << s[0] << ' ' << s[1] << endl; 
-    // }
+
     min = 9223372036854775807;
     for (auto s : seeds) {
-        cerr << "@@ SEED @@ " << i << endl;
-        for (long sr = s[0]; sr < s[0] + s[1]; sr++) {
-            long sri = sr;
-            for (auto c : cats) {
+        cerr << "@@ SEED @@" << endl;
+        vector<vector<long>> nseeds;
+        nseeds.push_back(s);
+        for (auto c : cats) {
+            for (auto ns : nseeds) {
+                long st[2] = {ns[0], ns[1]};
                 in_range = false;
                 // cerr << "### CAT ### " << c.first << endl;
                 for (auto l : c.second) {
                     // cerr << "***** RANGE ***** " << l.first << endl;
-                    if (sri >= l.second[1] && sri <= l.second[1] + l.second[2]) {
-                        sri = l.second[0] + sri - l.second[1];
-                        // cerr << "change here " << res[i] << endl;
-                        in_range = true;
+                    if (l.second[1] >= st[0] && l.second[1] + l.second[2] <= st[1]) {
+                        ns[0] = l.second[0] + ns[0] - l.second[1];
+                        ns[1] = l.second[0] + ns[1] - l.second[1];
                         break;
+                    } else if (l.second[1] < st[0] && l.second[1] + l.second[2] > st[1]) {
+                        ns[0] = l.second[0];
+                        ns[1] = l.second[0] + l.second[2];
+                        nseeds.push_back({l.second[0] + st[0] - l.second[1], l.second[0] - 1});
+                        nseeds.push_back({l.second[0] + l.second[2] + 1, l.second[0] + st[1] - l.second[1]});
+                        break;
+                    } else if (l.second[1] >= st[0] && l.second[1] + l.second[2] > st[1] && l.second[1] <= l.second[1] + l.second[2]) {
+                        ns[0] = l.second[0];
+                        ns[1] = l.second[0] + l.second[2];
+                        nseeds.push_back({l.second[0] + l.second[2] + 1, l.second[0] + st[1] - l.second[1]});
+                        break;
+                    } else if (l.second[1] < st[0] && l.second[1] + l.second[2] <= st[1] && l.second[1] >= l.second[0]) {
+                        ns[0] = l.second[0];
+                        ns[1] = l.second[0] + l.second[2];
+                        nseeds.push_back({l.second[0] + st[0] - l.second[1], l.second[0] - 1});
                     }
                 }
                 // cerr << sri << " " << endl;
             }
-            if (sri < min)
-                min = sri;
-        // cerr << endl;
         }
+/***************for nseed => look for the min of all ranges***************/
+        // if (sri < min)
+        //     min = sri;
+        // cerr << endl;
     }
     // cerr << "----------------------" << endl;
     cout << min << endl;
