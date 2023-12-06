@@ -9,7 +9,7 @@ using namespace std;
 int main () {
     ifstream myfile("day6_input.txt");
     string input;
-    vector<vector<int>> in(2,vector<int>(4, 0));
+    vector<vector<int>> in(2,vector<int>(4));
     int w, s = 0;
     
     int j = 0;
