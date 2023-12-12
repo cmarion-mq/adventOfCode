@@ -8,14 +8,13 @@
 using namespace std;
 
 int main () {
-    ifstream myfile("day5_input.txt");
+    ifstream myfile("day5_test.txt");
     string input;
     vector<long> seeds, res;
     string::size_type sz;
     map<int, map<int, vector<long>>> cats;
     int i = 7;
     int l = 0, c = 0, lc = 0;
-    bool in_range;
     
     if (myfile.is_open()) {
         while(getline (myfile, input)) {
@@ -43,12 +42,12 @@ int main () {
     i = 0;
     for (auto s : seeds) {
         res[i] = seeds[i];
+        // cerr << "seed " << res[i] << endl;
         for (auto c : cats) {
-            in_range = false;
             for (auto l : c.second) {
-                if (res[i] >= l.second[1] && res[i] <= l.second[1] + l.second[2]) {
+                if (res[i] >= l.second[1] && res[i] < l.second[1] + l.second[2]) {
                     res[i] = l.second[0] + res[i] - l.second[1];
-                    in_range = true;
+                    // cerr << res[i] << endl;
                     break;
                 }
             }

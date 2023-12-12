@@ -9,7 +9,8 @@
 using namespace std;
 
 int main () {
-    ifstream myfile("day5_testInput.txt");
+    ifstream myfile("day5_input.txt");
+    // ifstream myfile("day5_testInput.txt");
     string input;
     vector<vector<long>> seeds;
     string::size_type sz;
@@ -26,41 +27,21 @@ int main () {
                 while(i < input.length()) {
                     b = stol(input.substr(i), &sz);
                     i += sz + 1;
-                    e = b + stol(input.substr(i), &sz);
+                    e = b + stol(input.substr(i), &sz) - 1;
                     i += sz + 1;
-                    if (seeds.size() == 0)
-                        seeds.push_back({b, e});
-                    else {
-                        int k = 0;
-                        for (auto s : seeds){
-                            if (b >= s[0] && e <= s[1]) 
-                                continue;
-                            else if (b >= s[0] && e > s[1] && e <= s[1]) {
-                                s[1] = e;
-                                break;
-                            }
-                            else if (b < s[0] && e <= s[1] && e >= s[0]) {
-                                s[0] = b;
-                                break;
-                            }
-                            else if (b < s[0] && e > s[1]) {
-                                s[0] = b;
-                                s[1] = e;
-                                break;
-                            } else {
-                                k ++;
-                            }
-                        }
-                        if (k == seeds.size())
-                            seeds.push_back({b, e});
-                    }
+                    seeds.push_back({b, e});
                 }
             }
             else if (input.length() > 0 && isdigit(input[0])) {
                 i = 0;
+                int k = 0;
                 while(i < input.length()) {
-                    cats[c][lc].push_back(stol(input.substr(i), &sz));
+                    if (k == 2 && stol(input.substr(i), &sz) - 1 > 0)
+                        cats[c][lc].push_back(stol(input.substr(i), &sz) - 1);
+                    else
+                        cats[c][lc].push_back(stol(input.substr(i), &sz));
                     i += sz + 1;
+                    k ++;
                 }
                 lc ++;
             } else if (input.length() == 0 && l > 1) {
@@ -72,46 +53,71 @@ int main () {
     }
 
     min = 9223372036854775807;
+    i = 0; 
     for (auto s : seeds) {
-        cerr << "@@ SEED @@" << endl;
-        vector<vector<long>> nseeds;
-        nseeds.push_back(s);
+        cerr << "@@ SEED @@ " << i << endl;
+        vector<vector<long>> ranges_of_seeds;
         for (auto c : cats) {
-            for (auto ns : nseeds) {
-                long st[2] = {ns[0], ns[1]};
+            vector<vector<long>> temp_ranges_of_seeds;
+            if (c.first == 0)
+                ranges_of_seeds.push_back(s);
+            for (auto ns : ranges_of_seeds) {
                 in_range = false;
-                // cerr << "### CAT ### " << c.first << endl;
+                cerr << "### CAT ### " << c.first << endl;
                 for (auto l : c.second) {
-                    // cerr << "***** RANGE ***** " << l.first << endl;
-                    if (l.second[1] >= st[0] && l.second[1] + l.second[2] <= st[1]) {
-                        ns[0] = l.second[0] + ns[0] - l.second[1];
-                        ns[1] = l.second[0] + ns[1] - l.second[1];
+                    cerr << "***** RANGE ***** " << l.second[0] << endl;
+                    cerr << "line " << l.first << " " << l.second[1] << " " 
+                    << l.second[1] + l.second[2] << " (" << l.second[2]  << ")"
+                    << " ::: " << ns[0] << " " << ns[1] << endl; 
+                    if (ns[0] >= l.second[1] && ns[1] <= l.second[1] + l.second[2]) {
+                        cerr << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 1 / " << l.second[0] << endl; 
+                        temp_ranges_of_seeds.push_back(
+                            {l.second[0] + ns[0] - l.second[1], l.second[0] + ns[1] - l.second[1]});
+                        in_range = true;
                         break;
-                    } else if (l.second[1] < st[0] && l.second[1] + l.second[2] > st[1]) {
-                        ns[0] = l.second[0];
-                        ns[1] = l.second[0] + l.second[2];
-                        nseeds.push_back({l.second[0] + st[0] - l.second[1], l.second[0] - 1});
-                        nseeds.push_back({l.second[0] + l.second[2] + 1, l.second[0] + st[1] - l.second[1]});
+                    } else if (ns[0] < l.second[1] && ns[1] > l.second[1] + l.second[2]) {
+                        cerr << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 2 / " << l.second[0] << endl; 
+                        temp_ranges_of_seeds.push_back(
+                            {ns[0], l.second[1] - 1});
+                        temp_ranges_of_seeds.push_back(
+                            {l.second[0], l.second[0] + l.second[2]});
+                        temp_ranges_of_seeds.push_back(
+                            {l.second[1] + l.second[2] + 1, ns[1]});
+                        in_range = true;
                         break;
-                    } else if (l.second[1] >= st[0] && l.second[1] + l.second[2] > st[1] && l.second[1] <= l.second[1] + l.second[2]) {
-                        ns[0] = l.second[0];
-                        ns[1] = l.second[0] + l.second[2];
-                        nseeds.push_back({l.second[0] + l.second[2] + 1, l.second[0] + st[1] - l.second[1]});
+                    } else if (ns[0] >= l.second[1] && ns[1] >= l.second[1] + l.second[2] && ns[0] <= l.second[1] + l.second[2]) {
+                        cerr << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 3 / " << l.second[0] << endl; 
+                        temp_ranges_of_seeds.push_back(
+                            {l.second[0] + ns[0] - l.second[1], l.second[0] + l.second[2]});
+                        temp_ranges_of_seeds.push_back(
+                            {l.second[1] + l.second[2] + 1, ns[1]});
+                        in_range = true;
                         break;
-                    } else if (l.second[1] < st[0] && l.second[1] + l.second[2] <= st[1] && l.second[1] >= l.second[0]) {
-                        ns[0] = l.second[0];
-                        ns[1] = l.second[0] + l.second[2];
-                        nseeds.push_back({l.second[0] + st[0] - l.second[1], l.second[0] - 1});
+                    } else if (ns[0] <= l.second[1] && ns[1] <= l.second[1] + l.second[2] && ns[1] >= l.second[1]) {
+                        cerr << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& 4 / " << l.second[0] << endl;
+                        temp_ranges_of_seeds.push_back(
+                            {ns[0], l.second[1] - 1});
+                        temp_ranges_of_seeds.push_back(
+                            {l.second[0], l.second[0] + ns[1] - l.second[1]});
+                        in_range = true;
+                        break;
                     }
                 }
-                // cerr << sri << " " << endl;
+                if (!in_range)
+                    temp_ranges_of_seeds.push_back(ns);
+            }
+            ranges_of_seeds = temp_ranges_of_seeds;
+            for (auto ns : ranges_of_seeds) {
+                cerr << ns[0] << " " << ns[1] << endl;
             }
         }
-/***************for nseed => look for the min of all ranges***************/
-        // if (sri < min)
-        //     min = sri;
-        // cerr << endl;
+        for (auto ns : ranges_of_seeds) {
+            if (ns[0] < min)
+                min = ns[0];
+            // cerr << ns[0] << " " << ns[1] << endl;
+        }
+        i ++;
     }
-    // cerr << "----------------------" << endl;
+    cerr << "----------------------" << endl;
     cout << min << endl;
 }
