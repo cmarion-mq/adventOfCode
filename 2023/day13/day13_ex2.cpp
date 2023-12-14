@@ -6,12 +6,12 @@
 
 using namespace std;
 
-vector<array<int, 2>> smudge_lines(vector<string> &pattern) {
-    int tot_diff, i;
+int smudge_lines(vector<string> &pattern) {
+    int tot_diff, i, j;
     int len = pattern[0].length();
-    vector<array<int, 2>> ret;
+
     for (int l = 0; l < pattern.size() - 1; l ++) {
-        for (int c = 1; c < pattern.size(); c ++) {
+        for (int c = l + 1; c < pattern.size(); c ++) {
             tot_diff = 0;
             i = 0;
             while (i < len && tot_diff < 3) {
@@ -19,33 +19,37 @@ vector<array<int, 2>> smudge_lines(vector<string> &pattern) {
                     tot_diff ++;
                 i ++;
             }
-            if (tot_diff == 1)
-                ret.push_back({l, c});
-        }
-    }
-    return ret;
-}
+            if (tot_diff == 1 && (c - l - 1) % 2 == 0) {
+                if (c - l == 1) {
+                    i = l - 1;
+                    j = l + 2;
+                    while(i >= 0 && j < pattern.size() && pattern[i] == pattern[j]) {
+                        i--;
+                        j++;
+                    }
+                    if (i == -1 || j == pattern.size())
+                        return l + 1;
+                } else {
+                    i = 1;
+                    while (i <= (c - l) / 2 && pattern[l + i] == pattern[c - i])
+                        i ++;
+                    j = 1;
+                    while(l - j >= 0 && c + j < pattern.size() && pattern[l - j] == pattern[c  + j])
+                        j ++;
+                    if (i == ((c - l) / 2) + 1 && (l - j == -1 || c + j == pattern.size()))
+                        return l + i;            
+                }
 
-
-int note(vector<string> pattern) {
-    for (int s = 0; s < pattern.size() - 1; s ++) {
-        if (pattern[s] == pattern[s + 1]) {
-            int i = s - 1;
-            int j = s + 2;
-            while(i >= 0 && j < pattern.size() && pattern[i] == pattern[j]) {
-                i--;
-                j++;
             }
-            if (i == -1 || j == pattern.size())
-                return s + 1;
         }
+
     }
     return 0;
 }
 
 int main () {
-    // ifstream myfile("day13_input.txt");
-    ifstream myfile("day13_testInput.txt");
+    ifstream myfile("day13_input.txt");
+    // ifstream myfile("day13_testInput.txt");
     string          input;
     vector<string>  h_pattern, v_pattern;
     int             sym_sum = 0, l = 0;
@@ -63,17 +67,22 @@ int main () {
                 }
                 l ++;
             } else {
-                vector<array<int, 2>> s = smudge_lines(h_pattern);
-                for (auto a : s)
-                    cerr << a[0] << " / " << a[1] << endl;
-                cerr << endl;
-                // sym_sum += note(h_pattern) * 100 + note(v_pattern);
-                // h_pattern.clear();
-                // v_pattern.clear();
-                // l = 0;
+                int sh = smudge_lines(h_pattern);
+                if (sh) {
+                    sym_sum += sh * 100;
+                } else {
+                    sym_sum += smudge_lines(v_pattern);
+                }
+                h_pattern.clear();
+                v_pattern.clear();
+                l = 0;
             }
         }
     }
-    // sym_sum += note(h_pattern) * 100 + note(v_pattern);;
+    int sh = smudge_lines(h_pattern);
+    if (sh)
+        sym_sum += sh * 100;
+    else
+        sym_sum += smudge_lines(v_pattern);
     cout << sym_sum << endl;
 }
