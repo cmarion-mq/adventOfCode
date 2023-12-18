@@ -1,4 +1,0 @@
-seeds: 99
-
-seed-to-soil map:
-52 50 50
